@@ -1,0 +1,5 @@
+build --cxxopt=-std=c++11
+build --cxxopt=-g
+build --copt=-std=c++11
+build --copt=-g
+build --strip=never
