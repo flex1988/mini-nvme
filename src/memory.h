@@ -1,5 +1,6 @@
 #include "mini_nvme.h"
 #include <vector>
+#include <map>
 
 namespace MiniNVMe
 {
@@ -20,16 +21,21 @@ public:
     {
     }
 
-    void* Alloc(u64 size);
+    void Init();
+    void* Alloc(u64 size, u32 alignment = sizeof(u64));
     void Free(void*); 
+    u64 VirtToPhys(void* virt);
 
 private:
+    void allocNewChunk();
+
     std::string            _hugepage_path;
     u32                    _capacity;
     DmaChunk*              _available_chunk;
-    std::vector<DmaChunk*> _used_chunks;
     u32                    _chunk_size;
     u32                    _alloc_chunk_id;
+    u32                    _page_size;
+    std::map<u64, DmaChunk*> _used_chunks;
 };
 
 }

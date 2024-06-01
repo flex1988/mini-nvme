@@ -6,6 +6,7 @@ TEST(DmaAllocator, Alloc)
     MiniNVMe::DmaAllocator* allocator = new MiniNVMe::DmaAllocator("/mnt/huge", 1 << 32, 1 << 20);
     void* ptr = allocator->Alloc(128);
     ASSERT_NE(ptr, nullptr);
+    printf("virt %p phys %p\n", ptr, allocator->VirtToPhys(ptr));
     memset(ptr, 0, 128);
 }
 

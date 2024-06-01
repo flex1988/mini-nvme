@@ -42,13 +42,13 @@ PCIResource PCI::MapResource(const std::string& attr)
         printf("stat pci %s resouce failed: %s\n", path, strerror(errno));
         return { nullptr, 0 };
     }
-    int fd = open(path, O_RDONLY);
+    int fd = open(path, O_RDWR);
     if (fd < 0)
     {
         printf("open pci %s failed error: %s\n", path, strerror(errno));
         return { nullptr, 0 };
     }
-    void* ptr = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    void* ptr = mmap(NULL, s.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
     if (ptr == MAP_FAILED)
     {
         printf("pci mmap resouce failed %s\n", path);
