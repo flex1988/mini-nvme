@@ -59,14 +59,12 @@ bool NVMeDriver::Init(const std::string& pci_addr)
     ACQRegister* acq = (ACQRegister*)&_nvme_regs->acq;
     printf("[ACQ] ACQB %x\n", acq->bits.acqb);
 
+    MiniNVMe::DmaAllocator* allocator = new MiniNVMe::DmaAllocator("/mnt/huge", 1 << 30, 32 << 20);
+    allocator->Init();
 
-    // _nvme_regs->cc.bits.en = 0;
-
+    // 1. set cc.en = 1
     CtrlConfigurationRegister cc = _nvme_regs->cc;
     cc.bits.en = 0;
-    _mm_mfence();
-    *(volatile u32*)&_nvme_regs->cc = cc.raw;
-    
     SetRegs<u32>(offsetof(struct NVMeRegister, cc.raw), cc.raw);
 
     printf("[Controller Configuration] en %d css %d mps %d iosqes %d iocqes %d shn 0x%x\n",
@@ -75,16 +73,23 @@ bool NVMeDriver::Init(const std::string& pci_addr)
 
     printf("[Ctrl Status] rdy 0x%x shst 0x%x\n", _nvme_regs->csts.bits.rdy, _nvme_regs->csts.bits.shst);
 
-    while (_nvme_regs->csts.bits.rdy == 1)
+    // 2. wait csts.rdy == 0
+    while (_nvme_regs->csts.bits.rdy == 0)
     {
         printf("wait for controller shutting down... csts.shst %d cc.shn %d\n",
                 _nvme_regs->csts.bits.shst, _nvme_regs->cc.bits.shn);
         sleep(1);
     }
 
+    // 3. set admin qpair
+    _admin_sq = allocator->Alloc<NVMeSQ>();
+    _admin_cq = allocator->Alloc<NVMeCQ>();
 
-    // MiniNVMe::DmaAllocator* allocator = new MiniNVMe::DmaAllocator("/mnt/huge", 1 << 30, 32 << 20);
-    // void* a = allocator->Alloc(32);
+    SetRegs<u64>(offsetof(NVMeRegister, asq), allocator->VirtToPhys(_admin_sq));
+    SetRegs<u64>(offsetof(NVMeRegister, acq), allocator->VirtToPhys(_admin_cq));
+
+    // 4. set admin qpair depth
+
 
     return true;
 }

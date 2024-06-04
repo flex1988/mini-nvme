@@ -12,27 +12,6 @@ void DmaAllocator::Init()
     _page_size = sysconf(_SC_PAGESIZE);
 }
 
-void* DmaAllocator::Alloc(u64 size, u32 alignment)
-{
-    void* ptr = nullptr;
-    if (_available_chunk == nullptr)
-    {
-        allocNewChunk();
-        _available_chunk->allocated_size += size;
-        ptr = _available_chunk->ptr;
-    } else {
-        if (_chunk_size - _available_chunk->allocated_size < size) 
-        {
-            _used_chunks.insert({ (u64)_available_chunk->ptr / _chunk_size,  _available_chunk });
-            _available_chunk = nullptr;
-            allocNewChunk();   
-        }
-        ptr = (char*)_available_chunk->ptr + _available_chunk->allocated_size;
-        _available_chunk->allocated_size += size;
-    }
-    return ptr;
-}
-
 void DmaAllocator::allocNewChunk()
 {
     char data[32];

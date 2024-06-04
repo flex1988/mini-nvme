@@ -22,11 +22,15 @@ struct CtrlCap
 
 class NVMeSQ
 {
-
+    u64 head;
+    u64 tail;
+    u64 len;
+    u64 doorbell;
 };
 
 class NVMeCQ
 {
+    u64 doorbell;
 
 };
 
@@ -71,10 +75,10 @@ private:
     u32     _nvme_minor_version;
     NVMeRegister* _nvme_regs;
     CtrlCap _cap;
-    NVMeSQ  _admin_sq;
-    NVMeCQ  _admin_cq;
-    NVMeSQ  _io_sq;
-    NVMeCQ  _io_cq;
+    NVMeSQ*  _admin_sq;
+    NVMeCQ*  _admin_cq;
+    NVMeSQ*  _io_sq;
+    NVMeCQ*  _io_cq;
 };
 
 }
