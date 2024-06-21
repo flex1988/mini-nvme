@@ -1,3 +1,6 @@
+#pragma once
+#include <stddef.h>
+
 namespace MiniNVMe
 {
 
@@ -23,6 +26,46 @@ enum NVMeShstValue
     NVME_SHST_NORMAL = 0x0,
     NVME_SHST_SHUTTING = 0x1,
     NVME_SHST_COMPLETE = 0x2
+};
+
+struct NVMeCommand
+{
+    u8 opcode;
+    u8 flags;
+    u16 cid;
+    u32 nsid;
+    u64 reserved;
+    u64 md_ptr;
+    u64 dptr1;
+    u64 dptr2;
+    u32 cdw10;
+    u32 cdw11;
+    u32 cdw12;
+    u32 cdw13;
+    u32 cdw14;
+    u32 cdw15;
+};
+
+struct NVMeCompletion
+{
+    u32 command_spec;
+    u32 reserved;
+    u16 sq_id;
+    u16 sq_head;
+    u16 cid;
+    union
+    {
+        u16 status;
+        struct
+        {
+            u16 phase : 1;
+            u16 sc : 8;
+            u16 sct : 3;
+            u16 reserved2 : 2;
+            u16 m : 1;
+            u16 dnr : 1;
+        };
+     };
 };
 
 // – Controller Capabilities
@@ -135,20 +178,33 @@ union ACQRegister
     } bits;
 };
 static_assert(sizeof(ACQRegister) == 8, "invalid ACQRegister size");
+
+static_assert(sizeof(CapRegister) + sizeof(VSRegister) + sizeof(u32) + sizeof(u32) + sizeof(CtrlConfigurationRegister) +
+    sizeof(u32) + sizeof(CSTSRegister) + sizeof(u32) + sizeof(AQARegister) + sizeof(u64) + sizeof(u64) + sizeof(u32) * 4 +
+    sizeof(u64) == 80, "invalid register size");
     
 struct NVMeRegister
 {
-    CapRegister cap;
-    VSRegister  vs;
-    u32         intms;
-    u32         intmc;
-    CtrlConfigurationRegister cc;
-    u32         reserved;
-    CSTSRegister csts;
+    CapRegister cap;               // 8B 0
+    VSRegister  vs;                // 4B 8
+    u32         intms;             // 4B 12
+    u32         intmc;             // 4B 16
+    CtrlConfigurationRegister cc;  // 4B 20
+    u32         reserved;          // 4B 24
+    CSTSRegister csts;             // 4B 28
     u32         nssr;
     AQARegister aqa;
     u64         asq;
     u64         acq;
+    u32         cmbloc;
+    u32         cmbsz;
+    u32         bpinfo;
+    u32         bprsel;
+    u64         bpmbl; 
+    u32         reserved1[0x3ec];
+    u32         doorbell_base[1024];
 };
+
+static_assert(offsetof(NVMeRegister, doorbell_base) == 0x1000, "invalid doorbell base offset");
 
 }

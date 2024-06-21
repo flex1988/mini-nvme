@@ -22,6 +22,8 @@ struct CtrlCap
 
 class NVMeSQ
 {
+public:
+    void* commands;
     u64 head;
     u64 tail;
     u64 len;
@@ -30,8 +32,12 @@ class NVMeSQ
 
 class NVMeCQ
 {
+public:
+    void* completions;
+    u64 head;
+    bool phase;
+    u64 len;
     u64 doorbell;
-
 };
 
 struct PCIResource
@@ -68,6 +74,8 @@ public:
 
     template<typename T>
     void SetRegs(u32 offset, T value);
+    template<typename T>
+    T GetRegs(u32 offset);
 
 private:
     PCI*    _pci;

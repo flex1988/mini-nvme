@@ -1,3 +1,5 @@
+#pragma once
+
 #include "mini_nvme.h"
 #include "assert.h"
 #include <vector>
@@ -25,12 +27,11 @@ public:
     void Init();
 
     template<typename T>
-    T* Alloc(u32 count = 1)
+    T* Alloc(u32 count = 1, u32 alignment = alignof(T))
     {
-        u32 alignment = alignof(T);
         u32 size = sizeof(T);
-        assert(size >= alignment);
-        assert(size % alignment == 0);
+        assert(size * count >= alignment);
+        //assert(size % alignment == 0);
         void* ptr = nullptr;
         if (_available_chunk == nullptr)
         {
@@ -48,7 +49,7 @@ public:
         if (reinterpret_cast<u64>(ptr) & (alignment - 1))
         {
             u32 unaligned = (alignment - (reinterpret_cast<u64>(ptr) & (alignment - 1)));
-            ptr += unaligned;
+            ptr = (char*)ptr + unaligned;
             _available_chunk->allocated_size += unaligned;
         }
 

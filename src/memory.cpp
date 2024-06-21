@@ -10,6 +10,7 @@ namespace MiniNVMe
 void DmaAllocator::Init()
 {
     _page_size = sysconf(_SC_PAGESIZE);
+    printf("DMA pagesize %d\n", _page_size);
 }
 
 void DmaAllocator::allocNewChunk()
@@ -48,7 +49,7 @@ u64 DmaAllocator::VirtToPhys(void* virt)
     u64 addr = 0;
     read(fd, &addr, sizeof(u64));
     close(fd);
-    return (addr & 0x7fffffffffffffull) * _page_size + (u64)virt % _page_size;
+    return (addr & 0x007fffffffffffff) * _page_size + (u64)virt % _page_size;
 }
 
 }

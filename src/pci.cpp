@@ -48,7 +48,7 @@ PCIResource PCI::MapResource(const std::string& attr)
         printf("open pci %s failed error: %s\n", path, strerror(errno));
         return { nullptr, 0 };
     }
-    void* ptr = mmap(NULL, s.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
+    void* ptr = mmap(NULL, s.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (ptr == MAP_FAILED)
     {
         printf("pci mmap resouce failed %s\n", path);
