@@ -70,7 +70,7 @@ bool NVMeDriver::Init(const std::string& pci_addr)
     ACQRegister* acq = (ACQRegister*)&_nvme_regs->acq;
     printf("[ACQ] ACQB %x\n", acq->bits.acqb);
 
-    MiniNVMe::DmaAllocator* allocator = new MiniNVMe::DmaAllocator("/mnt/huge", 1 << 30, 32 << 20);
+    MiniNVMe::DmaAllocator* allocator = new MiniNVMe::DmaAllocator("/mnt/huge", 1 << 30, 2 << 20);
     allocator->Init();
 
     CtrlConfigurationRegister cc;

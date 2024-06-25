@@ -43,6 +43,7 @@ public:
             _available_chunk = nullptr;
             allocNewChunk();   
         }
+        assert(_available_chunk);
         
         ptr = (char*)_available_chunk->ptr + _available_chunk->allocated_size;
         
